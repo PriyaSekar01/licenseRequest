@@ -21,6 +21,8 @@ public class CompanyDto {
 	private Status status;
 	
 	
+	private String license;
+	
 	
 
 }

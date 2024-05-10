@@ -28,35 +28,33 @@ import lombok.NoArgsConstructor;
 @Table(name="company")
 public class Company {
 	
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name="id")
-	private Long id;
-	
-	@Column(name="company_name")
-	private String companyName;
-	
-	@Column(name="email")
-	private String email;
-	
-	
-	@Column(name="grace_period")
-	private String gracePeriod;
-	
-	@Column(name = "status")
-	@Enumerated(EnumType.STRING)
-	private Status status;
-	
-	@CreatedDate
-    @Column(name = "active_Date", updatable = false)
-    private LocalDateTime activationDate;
-	
-	@Column(name="expire_date")
-	private LocalDate expireDate;
-	
-	@Column(name="license")
-	private String license;
-	
+	 @Id
+	    @GeneratedValue(strategy = GenerationType.AUTO)
+	    @Column(name="id")
+	    private Long id;
+
+	    @Column(name="company_name")
+	    private String companyName;
+
+	    @Column(name="email")
+	    private String email;
+
+	    @Column(name="grace_period")
+	    private String gracePeriod;
+
+	    @Column(name = "status")
+	    @Enumerated(EnumType.STRING)
+	    private Status status;
+
+	    @CreatedDate
+	    @Column(name = "activation_date", updatable = false)
+	    private LocalDateTime activationDate;
+
+	    @Column(name="expire_date")
+	    private LocalDate expireDate;
+
+	    @Column(name="license")
+	    private String license;
 	
 	
 	

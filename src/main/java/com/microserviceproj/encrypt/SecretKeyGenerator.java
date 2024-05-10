@@ -1,4 +1,4 @@
-package com.microserviceproj.security;
+package com.microserviceproj.encrypt;
 
 import java.security.NoSuchAlgorithmException;
 
@@ -11,6 +11,6 @@ public class SecretKeyGenerator {
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
         keyGenerator.init(256);
         return keyGenerator.generateKey();
-    }
+  }
 
 }
