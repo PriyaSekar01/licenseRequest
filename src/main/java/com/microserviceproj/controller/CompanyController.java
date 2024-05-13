@@ -1,6 +1,7 @@
 package com.microserviceproj.controller;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import javax.security.auth.login.AccountNotFoundException;
 
@@ -20,8 +21,7 @@ import com.microserviceproj.dto.EncryptedData;
 import com.microserviceproj.encrypt.EncryptionService;
 import com.microserviceproj.entity.Company;
 import com.microserviceproj.service.CompanyService;
-
-
+import com.microserviceproj.service.LicenseGenerator;
 
 import lombok.RequiredArgsConstructor;
 
@@ -57,15 +57,27 @@ public class CompanyController {
         }
     }
 
-    @PostMapping("/encrypt")
-    public ResponseEntity<EncryptedData> encryptEmailAndLicense(@RequestParam String companyName) {
-        try {
-            return companyService.encryptEmailLicense(companyName);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    
+    @PostMapping("/encryptEmailLicense")
+    public ResponseEntity<EncryptedData> encryptEmailLicense(@RequestParam String companyName) {
+        EncryptedData encryptedData = companyService.encryptEmailLicense(companyName);
+        if (encryptedData != null) {
+            return ResponseEntity.ok(encryptedData);
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
+    
+    @PostMapping("/decryptData")
+    public ResponseEntity<Object> decryptData(@RequestBody EncryptedData request) {
+        String decryptedData =  encryptionService.decrypt(request.getEncryptedData(), request.getSecretKey());
+        if (decryptedData != null) {
+            return ResponseEntity.ok(decryptedData);
+        } else {
+            return ResponseEntity.badRequest().body("Decryption failed.");
+        }
+    }
+
 }
 
 	  

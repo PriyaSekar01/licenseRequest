@@ -38,6 +38,9 @@ public class Company {
 
 	    @Column(name="email")
 	    private String email;
+	    
+	    @Column(name="address")
+	    private String address;
 
 	    @Column(name="grace_period")
 	    private String gracePeriod;

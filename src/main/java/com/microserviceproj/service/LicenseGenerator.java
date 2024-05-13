@@ -31,4 +31,18 @@ public class LicenseGenerator {
         }
     }
 
+	
+	public static String decryptLicense(String encryptedLicense) {
+	    // Split the encrypted license into its components
+	    String[] parts = encryptedLicense.split("#");
+	    if (parts.length != 3) {
+	        throw new IllegalArgumentException("Invalid encrypted license format");
+	    }
+	    
+	    // Reconstruct the concatenated string
+	    String concatenatedString = parts[0] + "#" + parts[1] + "#" + parts[2];
+	    
+	    // Return the concatenated string as the decrypted license
+	    return concatenatedString;
+	}
 }

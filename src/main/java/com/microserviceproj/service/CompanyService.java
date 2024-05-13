@@ -2,20 +2,19 @@ package com.microserviceproj.service;
 
 
 
-import java.time.LocalDateTime;
-import java.util.Optional;
 
-import org.springframework.http.ResponseEntity;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 
 import com.microserviceproj.dto.CompanyDto;
 import com.microserviceproj.dto.EncryptedData;
+import com.microserviceproj.dto.Encryption;
 import com.microserviceproj.encrypt.EncryptionService;
 import com.microserviceproj.entity.Company;
 import com.microserviceproj.repository.CompanyRepository;
 
-import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -32,6 +31,7 @@ public class CompanyService {
         Company company = Company.builder()
                 .companyName(companyDto.getCompanyName())
                 .email(companyDto.getEmail())
+                .address(companyDto.getAddress())
                 .gracePeriod(companyDto.getGracePeriod())
                 .status(companyDto.getStatus())
                 // Assign provided creation time
@@ -57,23 +57,14 @@ public class CompanyService {
     }
 
     
-    public ResponseEntity<EncryptedData> encryptEmailLicense(String companyName) {
-        Company companyObj = new Company();
+    public EncryptedData encryptEmailLicense(String companyName) {
         Optional<Company> companyOptional = repository.findByCompanyName(companyName);
         if (companyOptional.isPresent()) {
             Company company = companyOptional.get();
-            EncryptedData encryptedData = encryptionService.encryptEmailAndLicense(company.getEmail(), company.getLicense());
-            return ResponseEntity.ok(encryptedData);
+            		
+            return encryptionService.encrypt(company.getEmail() + ";" + company.getLicense());
         } else {
-            return ResponseEntity.notFound().build();
+            return null;
         }
     }
-
-    
-    
-
-	
-	
-	
-
 }

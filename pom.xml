@@ -51,6 +51,22 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-api</artifactId>
+               <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+               <groupId>ch.qos.logback</groupId>
+               <artifactId>logback-classic</artifactId>
+               <version>${logback.version}</version>
+         </dependency>
+
+		<dependency>
+			<groupId>com.app</groupId>
+			<artifactId>event.management</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 
 	<build>

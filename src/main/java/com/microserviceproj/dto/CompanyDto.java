@@ -16,13 +16,12 @@ public class CompanyDto {
 	
 	private String email;
 	
+	private String address;
+	
 	private String gracePeriod;
 	
 	private Status status;
 	
 	
 	private String license;
-	
-	
-
-}
+	}

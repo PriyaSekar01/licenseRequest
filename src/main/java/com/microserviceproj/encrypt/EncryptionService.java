@@ -1,56 +1,66 @@
 package com.microserviceproj.encrypt;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PublicKey;
+import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.stereotype.Service;
 
 import com.microserviceproj.dto.EncryptedData;
 
+
+
 @Service
 public class EncryptionService {
 	
-	public EncryptedData encryptEmailAndLicense(String email,String company) {
-	    try {
-	        if (company == null) {
-	            throw new IllegalArgumentException("Company information is missing.");
-	        }
+	private SecretKey secretkey;
 
-	        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-	        keyPairGenerator.initialize(2048);
-	        KeyPair keyPair = keyPairGenerator.genKeyPair();
-	        PublicKey publicKey = keyPair.getPublic();
+        private static final String ALGORITHM = "AES";
 
-	        SecretKey secretKey = SecretKeyGenerator.generateSecretKey();
+        public EncryptedData encrypt(String data) {
+            try {
+                // Generate a new AES secret key
+                SecretKey secretKey = generateSecretKey();
 
-	        Cipher aesCipher = Cipher.getInstance("AES");
-	        aesCipher.init(Cipher.ENCRYPT_MODE, secretKey);
-	        byte[] emailLicenseBytes = (email + "||" + company).getBytes(); // Combine email and license
-	        byte[] encryptedEmailLicenseBytes = aesCipher.doFinal(emailLicenseBytes);
+                Cipher cipher = Cipher.getInstance(ALGORITHM);
+                cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+                byte[] encryptedData = cipher.doFinal(data.getBytes("UTF-8"));
 
-	        Cipher rsaCipher = Cipher.getInstance("RSA");
-	        rsaCipher.init(Cipher.ENCRYPT_MODE, publicKey);
-	        byte[] encryptedSecretKey = rsaCipher.doFinal(secretKey.getEncoded());
+                String encodedEncryptedData = Base64.getEncoder().encodeToString(encryptedData);
+                String encodedSecretKey = Base64.getEncoder().encodeToString(secretKey.getEncoded());
 
-	        EncryptedData response = new EncryptedData();
-	        response.setEncryptedData(Base64.getEncoder().encodeToString(encryptedEmailLicenseBytes));
-	        response.setSecretKey(Base64.getEncoder().encodeToString(encryptedSecretKey));
+                return new EncryptedData(encodedEncryptedData, encodedSecretKey);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
 
-	        return response;
-	    } catch (IllegalArgumentException e) {
-	        System.err.println(e.getMessage());
-	        return null;
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return null;
-	    }
-	}
+        private SecretKey generateSecretKey() throws NoSuchAlgorithmException {
+            KeyGenerator keyGen = KeyGenerator.getInstance(ALGORITHM);
+            keyGen.init(256); // AES key size can be 128, 192, or 256
+            return keyGen.generateKey();
+        }
 
 
 
+        public String decrypt(String encryptedData, String base64EncodedKey) {
+            try {
+                byte[] decodedKey = Base64.getDecoder().decode(base64EncodedKey);
+                Cipher cipher = Cipher.getInstance(ALGORITHM);
+                SecretKeySpec keySpec = new SecretKeySpec(decodedKey, ALGORITHM);
+                cipher.init(Cipher.DECRYPT_MODE, keySpec);
+                byte[] decodedEncryptedData = Base64.getDecoder().decode(encryptedData);
+                byte[] decryptedData = cipher.doFinal(decodedEncryptedData);
+                return new String(decryptedData, StandardCharsets.UTF_8);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
 }
