@@ -4,17 +4,17 @@ package com.microserviceproj.service;
 
 
 import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 
 import com.microserviceproj.dto.CompanyDto;
 import com.microserviceproj.dto.EncryptedData;
-import com.microserviceproj.dto.Encryption;
-import com.microserviceproj.encrypt.EncryptionService;
+
+import com.microserviceproj.encrypt.SecretKeyGenerator;
 import com.microserviceproj.entity.Company;
+import com.microserviceproj.enumeration.Status;
 import com.microserviceproj.repository.CompanyRepository;
-
-
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -25,7 +25,7 @@ public class CompanyService {
 	
 	private  final LicenseGenerator licenseGenerator;
 	
-	private final EncryptionService encryptionService;
+	private final SecretKeyGenerator encryptionService;
 
 	public Company createCompany(CompanyDto companyDto) {
         Company company = Company.builder()
@@ -33,38 +33,40 @@ public class CompanyService {
                 .email(companyDto.getEmail())
                 .address(companyDto.getAddress())
                 .gracePeriod(companyDto.getGracePeriod())
-                .status(companyDto.getStatus())
-                // Assign provided creation time
                 .build();
+
+        // Generate license
+        String license = licenseGenerator.generateLicense(company);
+        company.setLicense(license);
+        company.setStatus(Status.CREATE);
+
         return repository.save(company);
     }
-
 	
-	
-    public Company generateLicense(Long id) {
-        if (id == null) {
-            throw new IllegalArgumentException("Company ID cannot be null");
-        }
-        Company company = repository.findById(id)
-        	
-                                    .orElseThrow(() -> new IllegalArgumentException("Company not found with id: " + id));
-        String generatedLicense = licenseGenerator.generateLicense(company);
-        
-        company.setLicense(generatedLicense);
-        
     
-        return repository.save(company);
-    }
+	public EncryptedData encryptEmailLicense(String companyName) {
+	    Optional<Company> companyOptional = repository.findByCompanyName(companyName);
+	    if (companyOptional.isPresent()) {
+	        Company company = companyOptional.get();
+	        
+	        // Encrypt email and license
+	        EncryptedData encryptedData = encryptionService.encrypt(company.getEmail() + ";" + company.getLicense());
+	        
+	        if (encryptedData != null) {
+	            // Set status to "REQUEST"
+	            company.setStatus(Status.REQUEST);
+	            repository.save(company); // Assuming you're using JPA or some ORM
+	            
+	            return encryptedData;
+	        } else {
+	            // Handle encryption failure by throwing an IllegalArgumentException
+	            throw new IllegalArgumentException("Encryption failed for company: " + companyName);
+	        }
+	    } else {
+	        return null;
+	    }
+	}
 
-    
-    public EncryptedData encryptEmailLicense(String companyName) {
-        Optional<Company> companyOptional = repository.findByCompanyName(companyName);
-        if (companyOptional.isPresent()) {
-            Company company = companyOptional.get();
-            		
-            return encryptionService.encrypt(company.getEmail() + ";" + company.getLicense());
-        } else {
-            return null;
-        }
-    }
 }
+	    
+

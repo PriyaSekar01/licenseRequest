@@ -50,8 +50,8 @@ public class Company {
 	    private Status status;
 
 	    @CreatedDate
-	    @Column(name = "activation_date", updatable = false)
-	    private LocalDateTime activationDate;
+	    @Column(name = "activation_date", updatable = true)
+	    private LocalDate activationDate;
 
 	    @Column(name="expire_date")
 	    private LocalDate expireDate;

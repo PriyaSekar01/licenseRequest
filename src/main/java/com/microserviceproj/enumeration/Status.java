@@ -1,7 +1,10 @@
 package com.microserviceproj.enumeration;
 
 public enum Status {
-	
-	approved,pending,request,close
+   CREATE,	
+   APPROVED,
+   PENDING,
+   REQUEST,
+   CLOSE,
 
 }
