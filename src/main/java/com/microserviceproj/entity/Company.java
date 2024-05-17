@@ -44,6 +44,7 @@ public class Company {
 
 	    @Column(name="grace_period")
 	    private String gracePeriod;
+	    
 
 	    @Column(name = "status")
 	    @Enumerated(EnumType.STRING)
@@ -58,8 +59,6 @@ public class Company {
 
 	    @Column(name="license")
 	    private String license;
-	
-	
-	
+	    
 
 }

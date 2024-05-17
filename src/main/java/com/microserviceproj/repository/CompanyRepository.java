@@ -1,5 +1,6 @@
 package com.microserviceproj.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +11,8 @@ import com.microserviceproj.entity.Company;
 public interface CompanyRepository extends JpaRepository<Company, Long>{
 
 	Optional<Company> findByCompanyName(String companyName);
+	
+	List<Company> findAll();
 
 	Optional<Company> findByLicenseAndEmail(String license, String email);
 
