@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.CreatedDate;
 
+import com.microserviceproj.enumeration.GraceStatus;
 import com.microserviceproj.enumeration.Status;
 
 import jakarta.persistence.Column;
@@ -43,12 +44,17 @@ public class Company {
 	    private String address;
 
 	    @Column(name="grace_period")
-	    private String gracePeriod;
+	    private LocalDate gracePeriod;
 	    
 
 	    @Column(name = "status")
 	    @Enumerated(EnumType.STRING)
 	    private Status status;
+	    
+	    @Column(name="grace_status")
+	    @Enumerated(EnumType.STRING)
+	    private GraceStatus graceStatus;
+	    
 
 	    @CreatedDate
 	    @Column(name = "activation_date", updatable = true)

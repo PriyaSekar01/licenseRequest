@@ -2,6 +2,7 @@ package com.microserviceproj.response;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,14 +53,29 @@ public class ResponseGenerator {
 
     public TransactionContext generateTransactionContext(HttpHeaders httpHeaders) {
         TransactionContext context = new TransactionContext();
+        
         if (httpHeaders == null) {
-            context.setCorrelationId("demo");
-            context.setApplicationLabel("demo");
+            logger.warn("HttpHeaders is null, setting default values.");
+            context.setCorrelationId(UUID.randomUUID().toString());
+            context.setApplicationLabel("default-application");
             return context;
         }
 
-        context.setCorrelationId(httpHeaders.getFirst("correlationId") != null ? httpHeaders.getFirst("correlationId") : "demo");
-        context.setApplicationLabel(httpHeaders.getFirst("ApplicationLabel") != null ? httpHeaders.getFirst("ApplicationLabel") : "demo");
+        String correlationId = httpHeaders.getFirst("correlationId");
+        if (correlationId == null || correlationId.isEmpty()) {
+            correlationId = UUID.randomUUID().toString();
+            logger.warn("CorrelationId header is missing, setting default value: {}", correlationId);
+        }
+        
+        String applicationLabel = httpHeaders.getFirst("ApplicationLabel");
+        if (applicationLabel == null || applicationLabel.isEmpty()) {
+            applicationLabel = "default-application";
+            logger.warn("ApplicationLabel header is missing, setting default value: {}", applicationLabel);
+        }
+
+        context.setCorrelationId(correlationId);
+        context.setApplicationLabel(applicationLabel);
+
         return context;
     }
 }

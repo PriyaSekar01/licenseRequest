@@ -38,7 +38,6 @@ public class CompanyService {
                     .companyName(companyDto.getCompanyName())
                     .email(companyDto.getEmail())
                     .address(companyDto.getAddress())
-                    .gracePeriod(companyDto.getGracePeriod())
                     .build();
 
             // Generate license

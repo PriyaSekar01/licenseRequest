@@ -17,8 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.microserviceproj.dto.EncryptedData;
 import com.microserviceproj.dto.Encryption;
 import com.microserviceproj.entity.Company;
+import com.microserviceproj.enumeration.GraceStatus;
 import com.microserviceproj.enumeration.Status;
 import com.microserviceproj.repository.CompanyRepository;
+import com.microserviceproj.response.Response;
+import com.microserviceproj.response.ResponseGenerator;
+import com.microserviceproj.response.TransactionContext;
 import com.microserviceproj.service.AdminService;
 import lombok.RequiredArgsConstructor;
 
@@ -29,48 +33,55 @@ public class AdminController {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
-    private final AdminService adminService;
+    private  final  AdminService adminService;
+    
     private final CompanyRepository companyRepository;
+    
+    private final ResponseGenerator  responseGenerator;
 
     @PostMapping("/decryptData")
-    public ResponseEntity<Object> decryptData(@RequestBody EncryptedData request) {
+    public ResponseEntity<Response> decryptData(@RequestBody EncryptedData request) {
+        TransactionContext context = responseGenerator.generateTransactionContext(null);
         LocalDate activationDate = LocalDate.now();
 
         try {
             Encryption decryptedData = adminService.decryptData(request.getEncryptedData(), request.getSecretKey());
             if (decryptedData == null) {
                 logger.error("Failed to decrypt data. Encrypted data: {}", request.getEncryptedData());
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to decrypt data.");
+                return responseGenerator.errorResponse(context, "Failed to decrypt data.", HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
             Optional<Company> companyOptional = companyRepository.findByLicenseAndEmail(decryptedData.getLicense(), decryptedData.getEmail());
             if (companyOptional.isPresent()) {
-                Company company = companyOptional.get();
+            	Company company = companyOptional.get();
 
-                company.setActivationDate(activationDate);
-                LocalDate expireDate = activationDate.plusDays(30);
-                company.setExpireDate(expireDate);
-                long daysUntilExpiration = ChronoUnit.DAYS.between(LocalDate.now(), expireDate);
-                String gracePeriod = daysUntilExpiration + " days";
-                company.setGracePeriod(gracePeriod);
+            	company.setActivationDate(activationDate);
+            	LocalDate expireDate = activationDate.plusDays(30); // Set expiration date 30 days from activation
+            	company.setExpireDate(expireDate);
+            	company.setGraceStatus(GraceStatus.INACTICE);
 
-                company.setStatus(Status.APPROVED);
+            	// Calculate grace period
+            	LocalDate gracePeriodStart = expireDate.plusDays(1);
+            	LocalDate gracePeriodEnd = gracePeriodStart.plusDays(1);
+            	company.setGracePeriod(gracePeriodEnd); // Set the end date of the grace period
+
+            	company.setStatus(Status.APPROVED);
 
                 companyRepository.save(company);
 
                 logger.info("Data decrypted successfully and approved for company: {}", company.getCompanyName());
-                return ResponseEntity.ok("Data decrypted successfully and approved. Activation date and expire date set.");
+                return responseGenerator.successResponse(context, "Data decrypted successfully and approved. Activation date and expiration date set.", HttpStatus.OK);
             } else {
-                logger.error("License or email not found in the database. License: {}, Email: {}", decryptedData.getLicense(), decryptedData.getEmail());
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("License or email not found in the database. License: " + decryptedData.getLicense() + ", Email: " + decryptedData.getEmail());
+                String errorMessage = "License or email not found in the database. License: " + decryptedData.getLicense() + ", Email: " + decryptedData.getEmail();
+                logger.error(errorMessage);
+                return responseGenerator.errorResponse(context, errorMessage, HttpStatus.UNAUTHORIZED);
             }
         } catch (IllegalArgumentException e) {
             logger.error("Invalid input data: {}", e.getMessage());
-            return ResponseEntity.badRequest().body("Invalid input data.");
+            return responseGenerator.errorResponse(context, "Invalid input data.", HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             logger.error("Failed to decrypt data: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to decrypt data.");
+            return responseGenerator.errorResponse(context, "Failed to decrypt data.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 }

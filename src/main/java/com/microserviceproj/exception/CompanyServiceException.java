@@ -4,7 +4,12 @@ import java.io.Serializable;
 
 public class CompanyServiceException extends RuntimeException implements Serializable {
 
-    public CompanyServiceException(String message) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public CompanyServiceException(String message) {
         super(message);
     }
 
