@@ -2,8 +2,8 @@ package com.microserviceproj.enumeration;
 
 public enum GraceStatus {
 	
-	ACTICE,
-	INACTICE,
+	ACTIVE,
+	INACTIVE,
 	GRACE_PERIOD,
 	EXPIRED
 

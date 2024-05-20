@@ -35,33 +35,34 @@ public class GracePeriodService {
         for (Company company : companies) {
             LocalDate activationDate = company.getActivationDate();
             if (activationDate != null) {
-                LocalDate expireDate = activationDate.plusDays(30);
+                LocalDate expireDate = company.getExpireDate(); // Assuming expireDate is stored
 
                 if (today.isAfter(expireDate)) {
                     // Grace period starts after expiration
                     LocalDate gracePeriodStart = expireDate.plusDays(1);
-                    LocalDate gracePeriodEnd = gracePeriodStart.plusDays(1);
+                    LocalDate gracePeriodEnd = gracePeriodStart.plusDays(2);
 
                     if (today.isBefore(gracePeriodEnd)) {
                         // Grace period
                         company.setGracePeriod(gracePeriodEnd);
-                        company.setGraceStatus(GraceStatus.ACTICE); // Assuming there is a GRACE_PERIOD status
+                        company.setGraceStatus(GraceStatus.ACTIVE); // Assuming there is a GRACE_PERIOD status
                     } else {
                         // After grace period
                         company.setGracePeriod(gracePeriodEnd);
+                        company.setGraceStatus(GraceStatus.INACTIVE);
                         company.setStatus(Status.EXPIRED); // Set status to EXPIRED when grace period is over
                     }
-                } else {
-                    // Active period
-                    company.setGracePeriod(null);
-                    company.setStatus(Status.APPROVED); // Assuming there is an APPROVED status
-                }
 
-                companyRepository.save(company);
-                logger.info("Updated grace period for company: {} to {}", company.getCompanyName(), company.getGracePeriod());
+                    companyRepository.save(company);
+                    logger.info("Updated grace period for company: {} to {}", company.getCompanyName(), company.getGracePeriod());
+                } else {
+                    logger.info("Company {} is still within the active period.", company.getCompanyName());
+                }
             } else {
                 logger.warn("Company {} has no activation date.", company.getCompanyName());
             }
         }
-	}
+    }
+
+	
 }

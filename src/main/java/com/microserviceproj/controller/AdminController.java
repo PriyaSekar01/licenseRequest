@@ -58,7 +58,7 @@ public class AdminController {
             	company.setActivationDate(activationDate);
             	LocalDate expireDate = activationDate.plusDays(30); // Set expiration date 30 days from activation
             	company.setExpireDate(expireDate);
-            	company.setGraceStatus(GraceStatus.INACTICE);
+            	company.setGraceStatus(GraceStatus.ACTIVE);
 
             	// Calculate grace period
             	LocalDate gracePeriodStart = expireDate.plusDays(1);
@@ -84,4 +84,5 @@ public class AdminController {
             return responseGenerator.errorResponse(context, "Failed to decrypt data.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    
 }
