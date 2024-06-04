@@ -26,7 +26,7 @@ import com.microserviceproj.response.Response;
 import com.microserviceproj.response.ResponseGenerator;
 import com.microserviceproj.response.TransactionContext;
 import com.microserviceproj.service.CompanyService;
-
+import com.microserviceproj.service.OtpService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -39,7 +39,9 @@ public class CompanyController {
 
     private final CompanyService companyService;
     private final ResponseGenerator responseGenerator;
-
+    
+    private final OtpService otpService;
+    
     @PostMapping("/create")
     public ResponseEntity<Response> createCompany(@RequestBody CompanyDto companyDto) {
         TransactionContext context = responseGenerator.generateTransactionContext(null);
@@ -47,10 +49,28 @@ public class CompanyController {
             Company createdCompany = companyService.createCompany(companyDto);
             return responseGenerator.successResponse(context, createdCompany, HttpStatus.CREATED);
         } catch (Exception e) {
-            logger.error("Failed to create company: {}", e.getMessage());
+            logger.error("Failed to create company: {}", e.getMessage(), e);
             return responseGenerator.errorResponse(context, "Failed to create company", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    
+    @PostMapping("/verify-otp")
+    public ResponseEntity<Response> verifyOtp(@RequestParam String email, @RequestParam String otp) {
+        TransactionContext context = responseGenerator.generateTransactionContext(null);
+        try {
+            boolean isValid = otpService.validateOtp(email, otp);
+            if (isValid) {
+                return responseGenerator.successResponse(context, "OTP verified successfully", HttpStatus.OK);
+            } else {
+                return responseGenerator.errorResponse(context, "Invalid or expired OTP", HttpStatus.BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            logger.error("Failed to verify OTP: {}", e.getMessage());
+            return responseGenerator.errorResponse(context, "Failed to verify OTP", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
     @PostMapping("/encryptEmailLicense")
     public ResponseEntity<Response> encryptEmailLicense(@RequestParam String companyName) {

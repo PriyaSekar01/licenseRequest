@@ -56,12 +56,12 @@ public class AdminController {
             	Company company = companyOptional.get();
 
             	company.setActivationDate(activationDate);
-            	LocalDate expireDate = activationDate.plusDays(30); // Set expiration date 30 days from activation
+            	LocalDate expireDate = activationDate.plusDays(1); // Set expiration date 30 days from activation
             	company.setExpireDate(expireDate);
             	company.setGraceStatus(GraceStatus.ACTIVE);
 
             	// Calculate grace period
-            	LocalDate gracePeriodStart = expireDate.plusDays(1);
+            	LocalDate gracePeriodStart = expireDate.plusDays(0);
             	LocalDate gracePeriodEnd = gracePeriodStart.plusDays(1);
             	company.setGracePeriod(gracePeriodEnd); // Set the end date of the grace period
 
